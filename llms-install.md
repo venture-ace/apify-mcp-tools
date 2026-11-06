@@ -11,7 +11,7 @@ needs a free Apify account (https://console.apify.com); sign-in happens in the b
 {
   "mcpServers": {
     "venture-ace-tools": {
-      "url": "https://mcp.apify.com?tools=venture_ace/chatgpt-search-visibility,venture_ace/ats-jobs-feed,venture_ace/audio-transcription,venture_ace/bulk-ocr,venture_ace/website-screenshot",
+      "url": "https://mcp.apify.com?tools=venture_ace/chatgpt-search-visibility,venture_ace/ats-jobs-feed,venture_ace/audio-transcription,venture_ace/bulk-ocr,venture_ace/website-screenshot,venture_ace/video-frame-extractor",
       "type": "streamableHttp"
     }
   }
@@ -28,7 +28,7 @@ needs a free Apify account (https://console.apify.com); sign-in happens in the b
     "venture-ace-tools": {
       "command": "npx",
       "args": ["-y", "@apify/actors-mcp-server", "--tools",
-               "venture_ace/chatgpt-search-visibility,venture_ace/ats-jobs-feed,venture_ace/audio-transcription,venture_ace/bulk-ocr,venture_ace/website-screenshot"],
+               "venture_ace/chatgpt-search-visibility,venture_ace/ats-jobs-feed,venture_ace/audio-transcription,venture_ace/bulk-ocr,venture_ace/website-screenshot,venture_ace/video-frame-extractor"],
       "env": { "APIFY_TOKEN": "<ask the user>" }
     }
   }
@@ -36,7 +36,7 @@ needs a free Apify account (https://console.apify.com); sign-in happens in the b
 ```
 
    This needs Node.js 18 or newer.
-4. To confirm it works, list the tools; five Actor tools named after the Actors should appear. A cheap test is
+4. To confirm it works, list the tools; six Actor tools named after the Actors should appear. A cheap test is
    `venture_ace/website-screenshot` with one public URL.
 
 ## Notes for the agent

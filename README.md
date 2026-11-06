@@ -1,6 +1,6 @@
 # Apify MCP Tools by Venture Ace
 
-Five small, single-purpose tools for AI agents, published as Apify Actors under the `venture_ace` account. Apify exposes
+Six small, single-purpose tools for AI agents, published as Apify Actors under the `venture_ace` account. Apify exposes
 every public Actor as an MCP tool, so any MCP client (Claude, Cursor, Cline, VS Code and others) can call them through
 Apify's MCP server. This repository holds the setup instructions and links; the tools run on Apify's platform.
 
@@ -11,6 +11,7 @@ Apify's MCP server. This repository holds the setup instructions and links; the 
 | Audio Transcription | Transcribes audio and video files from direct URLs with Whisper (faster-whisper): text, timed segments, SRT and VTT. One result row per file, each with its own status. | [venture_ace/audio-transcription](https://apify.com/venture_ace/audio-transcription) | [page](https://audio-transcription.pages.dev) |
 | Bulk OCR | OCR for lists of image and PDF URLs with Tesseract. One result row per page with its own status (ok, no_text, unreadable, too_big, fetch_failed), confidence and optional lines. | [venture_ace/bulk-ocr](https://apify.com/venture_ace/bulk-ocr) | [page](https://bulk-ocr.pages.dev) |
 | Website Screenshot | PNG or JPEG screenshots and PDFs of a list of URLs with headless Chromium: full page with lazy-load scrolling, desktop/tablet/mobile, wait for a selector, cookie banners hidden. | [venture_ace/website-screenshot](https://apify.com/venture_ace/website-screenshot) | [page](https://website-screenshot-pdf.pages.dev) |
+| Video Frame Extractor | Frames from video file URLs with ffmpeg: every N seconds, every Nth frame, scene changes or exact timestamps, as JPG or PNG with timestamps. One result row per frame, and a status row for a bad link instead of a failed run. Direct file URLs only. | [venture_ace/video-frame-extractor](https://apify.com/venture_ace/video-frame-extractor) | [page](https://video-frames-to-images.pages.dev) |
 
 ## Connect
 
@@ -20,7 +21,7 @@ Hosted server (recommended; sign in with your Apify account through OAuth the fi
 {
   "mcpServers": {
     "venture-ace-tools": {
-      "url": "https://mcp.apify.com?tools=venture_ace/chatgpt-search-visibility,venture_ace/ats-jobs-feed,venture_ace/audio-transcription,venture_ace/bulk-ocr,venture_ace/website-screenshot"
+      "url": "https://mcp.apify.com?tools=venture_ace/chatgpt-search-visibility,venture_ace/ats-jobs-feed,venture_ace/audio-transcription,venture_ace/bulk-ocr,venture_ace/website-screenshot,venture_ace/video-frame-extractor"
     }
   }
 }
@@ -44,6 +45,7 @@ Current prices, in US dollars:
 - Audio Transcription: US$10 per 1,000 items (one item is one audio minute)
 - Bulk OCR: US$4 per 1,000 items (one item is one page)
 - Website Screenshot: US$4 per 1,000 items (one item is one captured page; failures are free)
+- Video Frame Extractor: priced at US$2 per 1,000 frames (one item is one extracted frame; failed frames are free); this per-event price is not in effect yet, so we charge nothing for it at present
 - Every run also carries Apify's standard actor-start event, US$0.00005 per run
 
 Running an Actor also uses Apify platform resources, which Apify bills to the account that runs it
