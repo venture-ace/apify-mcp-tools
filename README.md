@@ -36,12 +36,20 @@ environment. Details: [Apify MCP docs](https://docs.apify.com/platform/integrati
 
 ## Pricing and what you pay for
 
-We charge nothing for these tools at present: Apify has not yet enabled payouts on our account, so no pay-per-event
-price is live. Running an Actor still uses Apify platform resources, which Apify bills to the account that runs it
+Each Actor is charged per event on Apify (pay-per-event), and the price is shown on its Actor page before you run it.
+Current prices, in US dollars:
+
+- ChatGPT Search Visibility Tracker: US$5 per 1,000 prompts answered
+- ATS Jobs Feed: US$2 per 1,000 items (one item is one job)
+- Audio Transcription: US$10 per 1,000 items (one item is one audio minute)
+- Bulk OCR: US$4 per 1,000 items (one item is one page)
+- Website Screenshot: US$4 per 1,000 items (one item is one captured page; failures are free)
+- Every run also carries Apify's standard actor-start event, US$0.00005 per run
+
+Running an Actor also uses Apify platform resources, which Apify bills to the account that runs it
 (your own Apify account, which has a free monthly credit on its free plan; see Apify's pricing page). The
 ChatGPT Search Visibility Tracker also needs your own OpenAI API key, which you pass as an input and which is billed by
-OpenAI to you. When pay-per-event pricing goes live it will be shown on each Actor page before you run it; the
-planned prices are roughly US$2 to US$10 per thousand items (jobs, pages, prompts or audio minutes, depending on the tool), and that may change.
+OpenAI to you. Prices may change; the Actor page always shows the current one.
 
 ## Honest limits
 
