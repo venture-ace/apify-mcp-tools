@@ -36,6 +36,26 @@ Clients that only speak stdio can bridge to the hosted server with `npx -y mcp-r
 Apify's own local server: `npx -y @apify/actors-mcp-server --tools venture_ace/bulk-ocr` with `APIFY_TOKEN` set in the
 environment. Details: [Apify MCP docs](https://docs.apify.com/platform/integrations/mcp).
 
+### Run it yourself (stdio)
+
+This repo is also a small installable server: it starts Apify's local MCP server with all seven tools preset.
+It needs Node.js 18 or newer and `APIFY_TOKEN` in the environment.
+
+```json
+{
+  "mcpServers": {
+    "venture-ace-tools": {
+      "command": "npx",
+      "args": ["-y", "github:venture-ace/apify-mcp-tools"],
+      "env": { "APIFY_TOKEN": "<YOUR_APIFY_TOKEN>" }
+    }
+  }
+}
+```
+
+Set `APIFY_MCP_TOOLS` to a comma list (for example `venture_ace/bulk-ocr`) to load fewer tools. A `Dockerfile` is
+included for container hosts.
+
 ## Pricing and what you pay for
 
 Each Actor is charged per event on Apify (pay-per-event), and the price is shown on its Actor page before you run it.
