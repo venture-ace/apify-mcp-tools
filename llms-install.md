@@ -46,5 +46,8 @@ needs a free Apify account (https://console.apify.com); sign-in happens in the b
   do not write it into any file.
 - Every tool takes URLs or lists as input and returns one result row per item with its own status; check each row's
   status, since a failed item is reported in its own row.
-- Runs are billed by Apify to the user's Apify account (free monthly credit on the free plan); the suite adds no charge.
+- All seven Actors are priced per event on Apify (for example US$2 per 1,000 video frames, US$1.50 per 1,000 checked
+  links; the other five are listed in README.md). Tell the user the price from the Actor page before a large run. A price
+  set on 2026-11-07 may start after Apify's notice period, until then the run is ordinary Apify platform usage on the
+  user's account.
 - Full details and per-tool links are in README.md.

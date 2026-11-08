@@ -46,14 +46,15 @@ Current prices, in US dollars:
 - Audio Transcription: US$10 per 1,000 items (one item is one audio minute)
 - Bulk OCR: US$4 per 1,000 items (one item is one page)
 - Website Screenshot: US$4 per 1,000 items (one item is one captured page; failures are free)
-- Video Frame Extractor: priced at US$2 per 1,000 frames (one item is one extracted frame; failed frames are free); this per-event price is not in effect yet, so we charge nothing for it at present
-- Broken Link Checker: priced at US$1.50 per 1,000 links (one item is one link with an ok, redirect or broken verdict; blocked, timeout, refused and skipped links are free); this per-event price is not in effect yet, so we charge nothing for it at present
+- Video Frame Extractor: US$2 per 1,000 frames, US$0.002 each (one item is one extracted frame; failed frames are free). Set on 2026-11-07; Apify may delay the start by its notice period, and the Actor page shows the price that applies today.
+- Broken Link Checker: US$1.50 per 1,000 links, US$0.0015 each (one item is one link with an ok, redirect or broken verdict; blocked, timeout, refused and skipped links are free). Set on 2026-11-07; the same notice-period caveat applies.
 - Every run also carries Apify's standard actor-start event, US$0.00005 per run
 
-Running an Actor also uses Apify platform resources, which Apify bills to the account that runs it
-(your own Apify account, which has a free monthly credit on its free plan; see Apify's pricing page). The
-ChatGPT Search Visibility Tracker also needs your own OpenAI API key, which you pass as an input and which is billed by
-OpenAI to you. Prices may change; the Actor page always shows the current one.
+The prices above are what you pay for a run; the suite adds no other fee. Until a newly set price takes effect on Apify,
+a run is billed as ordinary Apify platform usage to the account that runs it (your own Apify account, which has a free
+monthly credit on its free plan; see Apify's pricing page). The ChatGPT Search Visibility Tracker also needs your own
+OpenAI API key, which you pass as an input and which is billed by OpenAI to you. Prices may change; the Actor page always
+shows the current one.
 
 ## Honest limits
 
