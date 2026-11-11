@@ -39,7 +39,7 @@ environment. Details: [Apify MCP docs](https://docs.apify.com/platform/integrati
 ### Run it yourself (stdio)
 
 This repo is also a small installable server: it starts Apify's local MCP server with all seven tools preset.
-It needs Node.js 18 or newer and `APIFY_TOKEN` in the environment.
+It needs Node.js 18 or newer and `APIFY_TOKEN` in the environment to run tools; without a token it still answers `initialize` and `tools/list` (from `tools.json`) so you can inspect the tools, and a tool call returns "Set APIFY_TOKEN (free Apify account) to run this tool."
 
 ```json
 {

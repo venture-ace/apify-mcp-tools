@@ -1,0 +1,2796 @@
+[
+  {
+    "name": "venture_ace--chatgpt-search-visibility",
+    "title": "venture_ace/chatgpt-search-visibility",
+    "description": "This tool calls the Actor \"venture_ace/chatgpt-search-visibility\" and retrieves its output results.\nActor description: Ask ChatGPT's web search your customers' questions through the official OpenAI API (your own key) and see if your brand or domain is mentioned or cited. US$5 per 1,000 prompts answered, pay per event.",
+    "inputSchema": {
+      "title": "ChatGPT search visibility input",
+      "type": "object",
+      "properties": {
+        "openaiApiKey": {
+          "title": "OpenAI API key (yours)",
+          "description": "Your own OpenAI API key. It is sent only to api.openai.com, is never written to the results or the log, and OpenAI bills you directly for the searches and tokens (web search is billed per call by OpenAI). Without a key the run stops and makes no call. Without a key the run ends with one input_error row and makes no call.",
+          "type": "string"
+        },
+        "prompts": {
+          "title": "Prompts (questions to ask)",
+          "description": "**REQUIRED** One question per line, as a customer would type it, for example 'best CRM for a small plumbing business'. Duplicates are dropped. Each prompt is one OpenAI web-search call.\nExample values: [\"best project management tool for small teams\"]",
+          "type": "array",
+          "prefill": [
+            "best project management tool for small teams"
+          ],
+          "items": {
+            "title": "Prompts (questions to ask)",
+            "description": "**REQUIRED** One question per line, as a customer would type it, for example 'best CRM for a small plumbing business'. Duplicates are dropped. Each prompt is one OpenAI web-search call.",
+            "type": "string"
+          },
+          "examples": [
+            "best project management tool for small teams"
+          ]
+        },
+        "brands": {
+          "title": "Brands or domains to look for",
+          "description": "**REQUIRED** Brand names ('Acme') and/or domains ('acme.com'). A name counts as mentioned when it appears as a whole word in the answer text (case-insensitive). A domain counts as mentioned when its name part (acme for acme.com) or the full domain appears as a whole word in the text, and as cited when a cited URL is on that domain or a subdomain. Put competitors here too to compare.\nExample values: [\"asana.com\"]",
+          "type": "array",
+          "prefill": [
+            "asana.com"
+          ],
+          "items": {
+            "title": "Brands or domains to look for",
+            "description": "**REQUIRED** Brand names ('Acme') and/or domains ('acme.com'). A name counts as mentioned when it appears as a whole word in the answer text (case-insensitive). A domain counts as mentioned when its name part (acme for acme.com) or the full domain appears as a whole word in the text, and as cited when a cited URL is on that domain or a subdomain. Put competitors here too to compare.",
+            "type": "string"
+          },
+          "examples": [
+            "asana.com"
+          ]
+        },
+        "maxPrompts": {
+          "title": "Max prompts per run",
+          "description": "Hard cap on prompts sent in this run; extra prompts are ignored with a log line.\nExample values: 50",
+          "type": "integer",
+          "default": 50,
+          "examples": [
+            50
+          ]
+        },
+        "model": {
+          "title": "OpenAI model",
+          "description": "Any model your key can use with the Responses API web search tool. Cheaper models cost you less per prompt at OpenAI.\nExample values: \"gpt-4.1-mini\"",
+          "type": "string",
+          "default": "gpt-4.1-mini",
+          "examples": [
+            "gpt-4.1-mini"
+          ]
+        },
+        "country": {
+          "title": "Search country (optional)",
+          "description": "Two-letter country code (for example AU, US, GB) passed as the approximate search location. Leave empty for no location.",
+          "type": "string"
+        },
+        "searchContextSize": {
+          "title": "Search context size",
+          "description": "How much web content the search tool feeds the model. Higher costs you more at OpenAI.\nExample values: \"medium\"",
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "default": "medium",
+          "examples": [
+            "medium"
+          ]
+        },
+        "waitSecs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 45,
+          "default": 30,
+          "description": "Max seconds (0\u201345, default 30) to cap the wait for the Actor run to reach terminal state. For long-running Actors the response returns at the cap with the current run status; follow `nextStep` to poll via get-actor-run. Set to 0 to fire-and-forget."
+        }
+      },
+      "required": [
+        "prompts",
+        "brands"
+      ],
+      "$id": "https://apify.com/mcp/venture_ace--chatgpt-search-visibility/schema.json"
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Actor run ID"
+        },
+        "apifyConsoleUrl": {
+          "type": "string",
+          "description": "Personalized Apify Console link to the run; present only for Console sessions"
+        },
+        "actorId": {
+          "type": "string",
+          "description": "Stable Apify Actor ID from the run record"
+        },
+        "actorName": {
+          "type": "string",
+          "description": "\"username/actor-name\""
+        },
+        "status": {
+          "type": "string",
+          "description": "Run status: READY | RUNNING | TIMING-OUT | TIMED-OUT | ABORTING | ABORTED | SUCCEEDED | FAILED"
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Pass-through from Apify run.statusMessage"
+        },
+        "exitCode": {
+          "type": "number",
+          "description": "Actor process exit code; populated for terminal states (especially FAILED)"
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run started"
+        },
+        "finishedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run finished (terminal states only)"
+        },
+        "stats": {
+          "type": "object",
+          "description": "Run statistics",
+          "properties": {
+            "runTimeSecs": {
+              "type": "number"
+            },
+            "computeUnits": {
+              "type": "number"
+            },
+            "memMaxBytes": {
+              "type": "number"
+            }
+          }
+        },
+        "storages": {
+          "type": "object",
+          "description": "Dataset and key-value store metadata, keyed by alias. \"default\" is always the primary entry.",
+          "properties": {
+            "datasets": {
+              "type": "object",
+              "description": "Map of dataset alias \u2192 metadata. Key \"default\" is always the run's primary dataset.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Dataset ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "itemCount": {
+                      "type": "number"
+                    },
+                    "inflatedBytes": {
+                      "type": "number",
+                      "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Dataset ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "itemCount": {
+                    "type": "number"
+                  },
+                  "inflatedBytes": {
+                    "type": "number",
+                    "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "keyValueStores": {
+              "type": "object",
+              "description": "Map of key-value store alias \u2192 metadata. Key \"default\" is always the run's primary store.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Key-value store ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "keyCount": {
+                      "type": "number",
+                      "description": "Total number of keys (omitted when truncated)"
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Up to 50 key names"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Key-value store ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "keyCount": {
+                    "type": "number",
+                    "description": "Total number of keys (omitted when truncated)"
+                  },
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Up to 50 key names"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "tip": {
+          "type": "object",
+          "description": "Advisory guidance RAG Web Browser wrote to its key-value store under the reserved \"TIP\" key",
+          "properties": {
+            "message": {
+              "type": "string",
+              "description": "Truncated to 300 characters, with a trailing ellipsis if the Actor's message was longer"
+            },
+            "level": {
+              "type": "string",
+              "enum": [
+                "info",
+                "warning"
+              ],
+              "description": "Omitted when the Actor wrote an unrecognized level"
+            },
+            "recommendedActorId": {
+              "type": "string",
+              "description": "Apify Actor ID the tip recommends, when it names one"
+            },
+            "caveat": {
+              "type": "string",
+              "description": "Present when this session cannot run the Actor the tip recommends"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "Past-tense summary of the run state"
+        },
+        "nextStep": {
+          "type": "string",
+          "description": "One primary follow-up action with identifiers interpolated"
+        }
+      },
+      "required": [
+        "runId",
+        "actorId",
+        "status",
+        "storages",
+        "summary",
+        "nextStep"
+      ]
+    },
+    "annotations": {
+      "title": "venture_ace/chatgpt-search-visibility",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "execution": {
+      "taskSupport": "optional"
+    }
+  },
+  {
+    "name": "venture_ace--ats-jobs-feed",
+    "title": "venture_ace/ats-jobs-feed",
+    "description": "This tool calls the Actor \"venture_ace/ats-jobs-feed\" and retrieves its output results.\nActor description: One normalised job postings feed across Greenhouse, Lever and Ashby from company careers URLs, with salary, remote and new-jobs-only filters.",
+    "inputSchema": {
+      "title": "ATS Jobs Feed input",
+      "type": "object",
+      "properties": {
+        "companies": {
+          "title": "Company careers URLs or board tokens",
+          "description": "**REQUIRED** Careers pages such as https://boards.greenhouse.io/airbnb, https://job-boards.greenhouse.io/stripe, https://jobs.lever.co/palantir, https://jobs.ashbyhq.com/notion or a Workday career site such as https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite. The ATS is detected from the URL. A bare token (airbnb) is tried on Greenhouse, Lever and Ashby unless you set the ATS below; Workday always needs the full myworkdayjobs.com URL.\nExample values: [\"https://boards.greenhouse.io/airbnb\",\"https://jobs.lever.co/palantir\",\"https://jobs.ashbyhq.com/notion\",\"https://workday.wd5.myworkdayjobs.com/Workday\"]",
+          "type": "array",
+          "prefill": [
+            "https://boards.greenhouse.io/airbnb",
+            "https://jobs.lever.co/palantir",
+            "https://jobs.ashbyhq.com/notion",
+            "https://workday.wd5.myworkdayjobs.com/Workday"
+          ],
+          "items": {
+            "title": "Company careers URLs or board tokens",
+            "description": "**REQUIRED** Careers pages such as https://boards.greenhouse.io/airbnb, https://job-boards.greenhouse.io/stripe, https://jobs.lever.co/palantir, https://jobs.ashbyhq.com/notion or a Workday career site such as https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite. The ATS is detected from the URL. A bare token (airbnb) is tried on Greenhouse, Lever and Ashby unless you set the ATS below; Workday always needs the full myworkdayjobs.com URL.",
+            "type": "string"
+          },
+          "examples": [
+            "https://boards.greenhouse.io/airbnb",
+            "https://jobs.lever.co/palantir",
+            "https://jobs.ashbyhq.com/notion",
+            "https://workday.wd5.myworkdayjobs.com/Workday"
+          ]
+        },
+        "ats": {
+          "title": "ATS for bare tokens",
+          "description": "Only used for entries that are not URLs. Auto tries Greenhouse, then Lever, then Ashby.\nExample values: \"auto\"",
+          "type": "string",
+          "enum": [
+            "auto",
+            "greenhouse",
+            "lever",
+            "ashby"
+          ],
+          "default": "auto",
+          "examples": [
+            "auto"
+          ]
+        },
+        "keywords": {
+          "title": "Keywords (any match)",
+          "description": "Keep a job if its title, department or description contains any of these (case-insensitive). Leave empty for all jobs.",
+          "type": "array",
+          "items": {
+            "title": "Keywords (any match)",
+            "description": "Keep a job if its title, department or description contains any of these (case-insensitive). Leave empty for all jobs.",
+            "type": "string"
+          }
+        },
+        "excludeKeywords": {
+          "title": "Exclude keywords",
+          "description": "Drop a job if its title, department or description contains any of these.",
+          "type": "array",
+          "items": {
+            "title": "Exclude keywords",
+            "description": "Drop a job if its title, department or description contains any of these.",
+            "type": "string"
+          }
+        },
+        "locations": {
+          "title": "Locations (any match)",
+          "description": "Keep a job if its location text contains any of these, e.g. Sydney, Germany, London.",
+          "type": "array",
+          "items": {
+            "title": "Locations (any match)",
+            "description": "Keep a job if its location text contains any of these, e.g. Sydney, Germany, London.",
+            "type": "string"
+          }
+        },
+        "remoteOnly": {
+          "title": "Remote jobs only",
+          "description": "Keep only jobs the ATS marks remote (or whose location says Remote).",
+          "type": "boolean",
+          "default": false
+        },
+        "postedSince": {
+          "title": "Posted since",
+          "description": "A date (YYYY-MM-DD) or a relative window in days (see the README). Jobs without a posted date are dropped when this is set.",
+          "type": "string"
+        },
+        "onlyNew": {
+          "title": "Only new jobs since the last run",
+          "description": "Output only jobs not seen in an earlier onlyNew run for the same boards (seen IDs are kept in a key-value store named ats-jobs-feed-seen). Use it on a schedule for a daily delta.",
+          "type": "boolean",
+          "default": false
+        },
+        "maxItems": {
+          "title": "Max jobs",
+          "description": "Stop after this many jobs in total. Keep it small for tests: you pay per job returned.\nExample values: 500",
+          "type": "integer",
+          "default": 500,
+          "examples": [
+            500
+          ]
+        },
+        "maxItemsPerCompany": {
+          "title": "Max jobs per company",
+          "description": "0 means no per-company limit.",
+          "type": "integer",
+          "default": 0
+        },
+        "stripEmails": {
+          "title": "Remove email addresses from descriptions",
+          "description": "Replaces email addresses inside job text with [email removed]. Recommended.\nExample values: true",
+          "type": "boolean",
+          "default": true,
+          "examples": [
+            true
+          ]
+        },
+        "waitSecs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 45,
+          "default": 30,
+          "description": "Max seconds (0\u201345, default 30) to cap the wait for the Actor run to reach terminal state. For long-running Actors the response returns at the cap with the current run status; follow `nextStep` to poll via get-actor-run. Set to 0 to fire-and-forget."
+        }
+      },
+      "required": [
+        "companies"
+      ],
+      "$id": "https://apify.com/mcp/venture_ace--ats-jobs-feed/schema.json"
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Actor run ID"
+        },
+        "apifyConsoleUrl": {
+          "type": "string",
+          "description": "Personalized Apify Console link to the run; present only for Console sessions"
+        },
+        "actorId": {
+          "type": "string",
+          "description": "Stable Apify Actor ID from the run record"
+        },
+        "actorName": {
+          "type": "string",
+          "description": "\"username/actor-name\""
+        },
+        "status": {
+          "type": "string",
+          "description": "Run status: READY | RUNNING | TIMING-OUT | TIMED-OUT | ABORTING | ABORTED | SUCCEEDED | FAILED"
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Pass-through from Apify run.statusMessage"
+        },
+        "exitCode": {
+          "type": "number",
+          "description": "Actor process exit code; populated for terminal states (especially FAILED)"
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run started"
+        },
+        "finishedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run finished (terminal states only)"
+        },
+        "stats": {
+          "type": "object",
+          "description": "Run statistics",
+          "properties": {
+            "runTimeSecs": {
+              "type": "number"
+            },
+            "computeUnits": {
+              "type": "number"
+            },
+            "memMaxBytes": {
+              "type": "number"
+            }
+          }
+        },
+        "storages": {
+          "type": "object",
+          "description": "Dataset and key-value store metadata, keyed by alias. \"default\" is always the primary entry.",
+          "properties": {
+            "datasets": {
+              "type": "object",
+              "description": "Map of dataset alias \u2192 metadata. Key \"default\" is always the run's primary dataset.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Dataset ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "itemCount": {
+                      "type": "number"
+                    },
+                    "inflatedBytes": {
+                      "type": "number",
+                      "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Dataset ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "itemCount": {
+                    "type": "number"
+                  },
+                  "inflatedBytes": {
+                    "type": "number",
+                    "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "keyValueStores": {
+              "type": "object",
+              "description": "Map of key-value store alias \u2192 metadata. Key \"default\" is always the run's primary store.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Key-value store ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "keyCount": {
+                      "type": "number",
+                      "description": "Total number of keys (omitted when truncated)"
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Up to 50 key names"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Key-value store ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "keyCount": {
+                    "type": "number",
+                    "description": "Total number of keys (omitted when truncated)"
+                  },
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Up to 50 key names"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "tip": {
+          "type": "object",
+          "description": "Advisory guidance RAG Web Browser wrote to its key-value store under the reserved \"TIP\" key",
+          "properties": {
+            "message": {
+              "type": "string",
+              "description": "Truncated to 300 characters, with a trailing ellipsis if the Actor's message was longer"
+            },
+            "level": {
+              "type": "string",
+              "enum": [
+                "info",
+                "warning"
+              ],
+              "description": "Omitted when the Actor wrote an unrecognized level"
+            },
+            "recommendedActorId": {
+              "type": "string",
+              "description": "Apify Actor ID the tip recommends, when it names one"
+            },
+            "caveat": {
+              "type": "string",
+              "description": "Present when this session cannot run the Actor the tip recommends"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "Past-tense summary of the run state"
+        },
+        "nextStep": {
+          "type": "string",
+          "description": "One primary follow-up action with identifiers interpolated"
+        }
+      },
+      "required": [
+        "runId",
+        "actorId",
+        "status",
+        "storages",
+        "summary",
+        "nextStep"
+      ]
+    },
+    "annotations": {
+      "title": "venture_ace/ats-jobs-feed",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "execution": {
+      "taskSupport": "optional"
+    }
+  },
+  {
+    "name": "venture_ace--audio-transcription",
+    "title": "venture_ace/audio-transcription",
+    "description": "This tool calls the Actor \"venture_ace/audio-transcription\" and retrieves its output results.\nActor description: Audio transcription with Whisper for audio and video files from direct URLs (faster-whisper): text, timed segments, SRT and VTT. One result row per file with its own status; one bad file gets a failed row and the rest still run.",
+    "inputSchema": {
+      "title": "Audio Transcription input",
+      "type": "object",
+      "properties": {
+        "files": {
+          "title": "Audio or video file URLs",
+          "description": "**REQUIRED** Direct links to audio or video files (mp3, wav, m4a, ogg, flac, mp4, webm and anything ffmpeg reads), one per line. Web-page links (YouTube, TikTok, Instagram and similar) are refused with a per-file error. Localhost and private addresses are refused. Max 500 MB per file.\nExample values: [\"https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg\"]",
+          "type": "array",
+          "prefill": [
+            "https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg"
+          ],
+          "items": {
+            "title": "Audio or video file URLs",
+            "description": "**REQUIRED** Direct links to audio or video files (mp3, wav, m4a, ogg, flac, mp4, webm and anything ffmpeg reads), one per line. Web-page links (YouTube, TikTok, Instagram and similar) are refused with a per-file error. Localhost and private addresses are refused. Max 500 MB per file.",
+            "type": "string"
+          },
+          "examples": [
+            "https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg"
+          ]
+        },
+        "model": {
+          "title": "Whisper model",
+          "description": "base uses less compute; small is more accurate but slower, so it costs more usage.\nExample values: \"base\"",
+          "type": "string",
+          "enum": [
+            "base",
+            "small"
+          ],
+          "default": "base",
+          "examples": [
+            "base"
+          ]
+        },
+        "language": {
+          "title": "Language",
+          "description": "ISO code such as en, de, es, or auto to detect it from the audio.\nExample values: \"auto\"",
+          "type": "string",
+          "default": "auto",
+          "examples": [
+            "auto"
+          ]
+        },
+        "outputFormats": {
+          "title": "Output formats",
+          "description": "Plain text is always returned. Add timed segments, SRT or VTT subtitles as needed.\nExample values: [\"segments\"]",
+          "type": "array",
+          "default": [
+            "segments"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "segments",
+              "srt",
+              "vtt"
+            ],
+            "enumTitles": [
+              "Timed segments",
+              "SRT subtitles",
+              "VTT subtitles"
+            ]
+          },
+          "examples": [
+            "segments"
+          ]
+        },
+        "maxAudioMinutes": {
+          "title": "Max audio minutes per run",
+          "description": "Safety cap on the total audio transcribed in this run. A file that would go past it is returned with status too_long and is not transcribed. Whisper runs on CPU, so long audio takes a while (small: longer); the run stops at the Actor timeout.\nExample values: 60",
+          "type": "integer",
+          "default": 60,
+          "examples": [
+            60
+          ]
+        },
+        "waitSecs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 45,
+          "default": 30,
+          "description": "Max seconds (0\u201345, default 30) to cap the wait for the Actor run to reach terminal state. For long-running Actors the response returns at the cap with the current run status; follow `nextStep` to poll via get-actor-run. Set to 0 to fire-and-forget."
+        }
+      },
+      "required": [
+        "files"
+      ],
+      "$id": "https://apify.com/mcp/venture_ace--audio-transcription/schema.json"
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Actor run ID"
+        },
+        "apifyConsoleUrl": {
+          "type": "string",
+          "description": "Personalized Apify Console link to the run; present only for Console sessions"
+        },
+        "actorId": {
+          "type": "string",
+          "description": "Stable Apify Actor ID from the run record"
+        },
+        "actorName": {
+          "type": "string",
+          "description": "\"username/actor-name\""
+        },
+        "status": {
+          "type": "string",
+          "description": "Run status: READY | RUNNING | TIMING-OUT | TIMED-OUT | ABORTING | ABORTED | SUCCEEDED | FAILED"
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Pass-through from Apify run.statusMessage"
+        },
+        "exitCode": {
+          "type": "number",
+          "description": "Actor process exit code; populated for terminal states (especially FAILED)"
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run started"
+        },
+        "finishedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run finished (terminal states only)"
+        },
+        "stats": {
+          "type": "object",
+          "description": "Run statistics",
+          "properties": {
+            "runTimeSecs": {
+              "type": "number"
+            },
+            "computeUnits": {
+              "type": "number"
+            },
+            "memMaxBytes": {
+              "type": "number"
+            }
+          }
+        },
+        "storages": {
+          "type": "object",
+          "description": "Dataset and key-value store metadata, keyed by alias. \"default\" is always the primary entry.",
+          "properties": {
+            "datasets": {
+              "type": "object",
+              "description": "Map of dataset alias \u2192 metadata. Key \"default\" is always the run's primary dataset.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Dataset ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "itemCount": {
+                      "type": "number"
+                    },
+                    "inflatedBytes": {
+                      "type": "number",
+                      "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Dataset ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "itemCount": {
+                    "type": "number"
+                  },
+                  "inflatedBytes": {
+                    "type": "number",
+                    "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "keyValueStores": {
+              "type": "object",
+              "description": "Map of key-value store alias \u2192 metadata. Key \"default\" is always the run's primary store.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Key-value store ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "keyCount": {
+                      "type": "number",
+                      "description": "Total number of keys (omitted when truncated)"
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Up to 50 key names"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Key-value store ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "keyCount": {
+                    "type": "number",
+                    "description": "Total number of keys (omitted when truncated)"
+                  },
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Up to 50 key names"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "tip": {
+          "type": "object",
+          "description": "Advisory guidance RAG Web Browser wrote to its key-value store under the reserved \"TIP\" key",
+          "properties": {
+            "message": {
+              "type": "string",
+              "description": "Truncated to 300 characters, with a trailing ellipsis if the Actor's message was longer"
+            },
+            "level": {
+              "type": "string",
+              "enum": [
+                "info",
+                "warning"
+              ],
+              "description": "Omitted when the Actor wrote an unrecognized level"
+            },
+            "recommendedActorId": {
+              "type": "string",
+              "description": "Apify Actor ID the tip recommends, when it names one"
+            },
+            "caveat": {
+              "type": "string",
+              "description": "Present when this session cannot run the Actor the tip recommends"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "Past-tense summary of the run state"
+        },
+        "nextStep": {
+          "type": "string",
+          "description": "One primary follow-up action with identifiers interpolated"
+        }
+      },
+      "required": [
+        "runId",
+        "actorId",
+        "status",
+        "storages",
+        "summary",
+        "nextStep"
+      ]
+    },
+    "annotations": {
+      "title": "venture_ace/audio-transcription",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "execution": {
+      "taskSupport": "optional"
+    }
+  },
+  {
+    "name": "venture_ace--bulk-ocr",
+    "title": "venture_ace/bulk-ocr",
+    "description": "This tool calls the Actor \"venture_ace/bulk-ocr\" and retrieves its output results.\nActor description: OCR for lists of image and PDF URLs with Tesseract. One result row per page with its own status (ok, no_text, unreadable, too_big, fetch_failed), confidence and optional lines; one bad file does not fail the run.",
+    "inputSchema": {
+      "title": "Bulk OCR input",
+      "type": "object",
+      "properties": {
+        "files": {
+          "title": "Image or PDF URLs (or key-value store keys)",
+          "description": "**REQUIRED** Direct links to images (png, jpg, tiff, bmp, webp, gif) or PDFs, one per line, max 100 MB each. A line that is not a URL is read as a key in this run's default key-value store. Localhost and private addresses are refused, redirects included. Web-page links are refused with a per-file status.\nExample values: [\"https://raw.githubusercontent.com/tesseract-ocr/tessdoc/main/images/eurotext.png\"]",
+          "type": "array",
+          "prefill": [
+            "https://raw.githubusercontent.com/tesseract-ocr/tessdoc/main/images/eurotext.png"
+          ],
+          "items": {
+            "title": "Image or PDF URLs (or key-value store keys)",
+            "description": "**REQUIRED** Direct links to images (png, jpg, tiff, bmp, webp, gif) or PDFs, one per line, max 100 MB each. A line that is not a URL is read as a key in this run's default key-value store. Localhost and private addresses are refused, redirects included. Web-page links are refused with a per-file status.",
+            "type": "string"
+          },
+          "examples": [
+            "https://raw.githubusercontent.com/tesseract-ocr/tessdoc/main/images/eurotext.png"
+          ]
+        },
+        "languages": {
+          "title": "Languages",
+          "description": "Tesseract languages to read with (several are combined). Installed: English, German, French, Spanish, Italian, Portuguese, Dutch.\nExample values: [\"eng\"]",
+          "type": "array",
+          "default": [
+            "eng"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "eng",
+              "deu",
+              "fra",
+              "spa",
+              "ita",
+              "por",
+              "nld"
+            ],
+            "enumTitles": [
+              "English",
+              "German",
+              "French",
+              "Spanish",
+              "Italian",
+              "Portuguese",
+              "Dutch"
+            ]
+          },
+          "examples": [
+            "eng"
+          ]
+        },
+        "minConfidence": {
+          "title": "Minimum confidence (0 to 1)",
+          "description": "A page whose mean word confidence is below this is returned with status unreadable instead of ok.\nExample values: 0.5",
+          "type": "number",
+          "default": 0.5,
+          "examples": [
+            0.5
+          ]
+        },
+        "maxPages": {
+          "title": "Max pages per run",
+          "description": "Hard cap on pages read in this run (images count as one page). Pages past the cap get a too_big row and are not read.\nExample values: 200",
+          "type": "integer",
+          "default": 200,
+          "examples": [
+            200
+          ]
+        },
+        "pdfDpi": {
+          "title": "PDF render resolution (dpi)",
+          "description": "Pages of a PDF are rendered at this resolution before reading. Higher reads small print better and runs slower.\nExample values: 200",
+          "type": "integer",
+          "default": 200,
+          "examples": [
+            200
+          ]
+        },
+        "outputFormats": {
+          "title": "Output formats",
+          "description": "Plain text is the default. Add lines (text, confidence and box per line) or markdown (text split into paragraphs).\nExample values: [\"text\"]",
+          "type": "array",
+          "default": [
+            "text"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "text",
+              "lines",
+              "markdown"
+            ],
+            "enumTitles": [
+              "Plain text",
+              "Lines with confidence and box",
+              "Markdown paragraphs"
+            ]
+          },
+          "examples": [
+            "text"
+          ]
+        },
+        "waitSecs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 45,
+          "default": 30,
+          "description": "Max seconds (0\u201345, default 30) to cap the wait for the Actor run to reach terminal state. For long-running Actors the response returns at the cap with the current run status; follow `nextStep` to poll via get-actor-run. Set to 0 to fire-and-forget."
+        }
+      },
+      "required": [
+        "files"
+      ],
+      "$id": "https://apify.com/mcp/venture_ace--bulk-ocr/schema.json"
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Actor run ID"
+        },
+        "apifyConsoleUrl": {
+          "type": "string",
+          "description": "Personalized Apify Console link to the run; present only for Console sessions"
+        },
+        "actorId": {
+          "type": "string",
+          "description": "Stable Apify Actor ID from the run record"
+        },
+        "actorName": {
+          "type": "string",
+          "description": "\"username/actor-name\""
+        },
+        "status": {
+          "type": "string",
+          "description": "Run status: READY | RUNNING | TIMING-OUT | TIMED-OUT | ABORTING | ABORTED | SUCCEEDED | FAILED"
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Pass-through from Apify run.statusMessage"
+        },
+        "exitCode": {
+          "type": "number",
+          "description": "Actor process exit code; populated for terminal states (especially FAILED)"
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run started"
+        },
+        "finishedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run finished (terminal states only)"
+        },
+        "stats": {
+          "type": "object",
+          "description": "Run statistics",
+          "properties": {
+            "runTimeSecs": {
+              "type": "number"
+            },
+            "computeUnits": {
+              "type": "number"
+            },
+            "memMaxBytes": {
+              "type": "number"
+            }
+          }
+        },
+        "storages": {
+          "type": "object",
+          "description": "Dataset and key-value store metadata, keyed by alias. \"default\" is always the primary entry.",
+          "properties": {
+            "datasets": {
+              "type": "object",
+              "description": "Map of dataset alias \u2192 metadata. Key \"default\" is always the run's primary dataset.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Dataset ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "itemCount": {
+                      "type": "number"
+                    },
+                    "inflatedBytes": {
+                      "type": "number",
+                      "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Dataset ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "itemCount": {
+                    "type": "number"
+                  },
+                  "inflatedBytes": {
+                    "type": "number",
+                    "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "keyValueStores": {
+              "type": "object",
+              "description": "Map of key-value store alias \u2192 metadata. Key \"default\" is always the run's primary store.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Key-value store ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "keyCount": {
+                      "type": "number",
+                      "description": "Total number of keys (omitted when truncated)"
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Up to 50 key names"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Key-value store ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "keyCount": {
+                    "type": "number",
+                    "description": "Total number of keys (omitted when truncated)"
+                  },
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Up to 50 key names"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "tip": {
+          "type": "object",
+          "description": "Advisory guidance RAG Web Browser wrote to its key-value store under the reserved \"TIP\" key",
+          "properties": {
+            "message": {
+              "type": "string",
+              "description": "Truncated to 300 characters, with a trailing ellipsis if the Actor's message was longer"
+            },
+            "level": {
+              "type": "string",
+              "enum": [
+                "info",
+                "warning"
+              ],
+              "description": "Omitted when the Actor wrote an unrecognized level"
+            },
+            "recommendedActorId": {
+              "type": "string",
+              "description": "Apify Actor ID the tip recommends, when it names one"
+            },
+            "caveat": {
+              "type": "string",
+              "description": "Present when this session cannot run the Actor the tip recommends"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "Past-tense summary of the run state"
+        },
+        "nextStep": {
+          "type": "string",
+          "description": "One primary follow-up action with identifiers interpolated"
+        }
+      },
+      "required": [
+        "runId",
+        "actorId",
+        "status",
+        "storages",
+        "summary",
+        "nextStep"
+      ]
+    },
+    "annotations": {
+      "title": "venture_ace/bulk-ocr",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "execution": {
+      "taskSupport": "optional"
+    }
+  },
+  {
+    "name": "venture_ace--website-screenshot",
+    "title": "venture_ace/website-screenshot",
+    "description": "This tool calls the Actor \"venture_ace/website-screenshot\" and retrieves its output results.\nActor description: Screenshots (PNG or JPEG) and PDFs of any list of URLs with headless Chromium: full page with lazy-load scrolling, desktop/tablet/mobile, wait for a selector, cookie banners hidden. One result row per URL.",
+    "inputSchema": {
+      "title": "Website Screenshot input",
+      "type": "object",
+      "properties": {
+        "urls": {
+          "title": "URLs",
+          "description": "**REQUIRED** Pages to capture, one per line. https:// is added if missing. Only public http(s) pages; localhost and private addresses are refused.\nExample values: [\"https://example.com\",\"https://en.wikipedia.org/wiki/Screenshot\"]",
+          "type": "array",
+          "prefill": [
+            "https://example.com",
+            "https://en.wikipedia.org/wiki/Screenshot"
+          ],
+          "items": {
+            "title": "URLs",
+            "description": "**REQUIRED** Pages to capture, one per line. https:// is added if missing. Only public http(s) pages; localhost and private addresses are refused.",
+            "type": "string"
+          },
+          "examples": [
+            "https://example.com",
+            "https://en.wikipedia.org/wiki/Screenshot"
+          ]
+        },
+        "format": {
+          "title": "Image format",
+          "description": "PNG is lossless; JPEG is much smaller for long pages. Choose none to get only PDFs.\nExample values: \"png\"",
+          "type": "string",
+          "enum": [
+            "png",
+            "jpeg",
+            "none"
+          ],
+          "default": "png",
+          "examples": [
+            "png"
+          ]
+        },
+        "pdf": {
+          "title": "Also save a PDF",
+          "description": "Print each page to PDF (A4 by default) in addition to the image.",
+          "type": "boolean",
+          "default": false
+        },
+        "fullPage": {
+          "title": "Full page",
+          "description": "Capture the whole scrollable page, not just the first screen. The page is scrolled first so lazy-loaded images appear. Capped at 16,000 px tall.\nExample values: true",
+          "type": "boolean",
+          "default": true,
+          "examples": [
+            true
+          ]
+        },
+        "device": {
+          "title": "Device",
+          "description": "Viewport and user agent preset. Desktop 1440x900, tablet 820x1180, mobile 390x844.\nExample values: \"desktop\"",
+          "type": "string",
+          "enum": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "default": "desktop",
+          "examples": [
+            "desktop"
+          ]
+        },
+        "viewportWidth": {
+          "title": "Custom viewport width (px)",
+          "description": "Overrides the device width. Leave empty to use the preset.",
+          "type": "integer"
+        },
+        "viewportHeight": {
+          "title": "Custom viewport height (px)",
+          "description": "Overrides the device height. Leave empty to use the preset.",
+          "type": "integer"
+        },
+        "deviceScaleFactor": {
+          "title": "Pixel ratio",
+          "description": "1 is standard; 2 gives retina-sharp images at four times the pixels (larger files).\nExample values: 1",
+          "type": "integer",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "jpegQuality": {
+          "title": "JPEG quality",
+          "description": "1 to 100, used when the format is JPEG.\nExample values: 80",
+          "type": "integer",
+          "default": 80,
+          "examples": [
+            80
+          ]
+        },
+        "waitUntil": {
+          "title": "Wait until",
+          "description": "When navigation counts as done. networkidle waits for quiet network and is best for most sites; domcontentloaded is fastest.\nExample values: \"load\"",
+          "type": "string",
+          "enum": [
+            "load",
+            "domcontentloaded",
+            "networkidle"
+          ],
+          "default": "load",
+          "examples": [
+            "load"
+          ]
+        },
+        "waitForSelector": {
+          "title": "Wait for selector",
+          "description": "CSS selector that must be visible before the capture, for example #app .loaded. If it never appears the row is marked failed (see failOnSelectorTimeout).",
+          "type": "string"
+        },
+        "failOnSelectorTimeout": {
+          "title": "Fail if the selector never appears",
+          "description": "Off: capture anyway and note the timeout in the row. On: mark the URL failed.",
+          "type": "boolean",
+          "default": false
+        },
+        "delayMs": {
+          "title": "Extra delay (ms)",
+          "description": "Fixed wait after the page has loaded, for animations and late widgets.",
+          "type": "integer",
+          "default": 0
+        },
+        "hideCookieBanners": {
+          "title": "Hide cookie banners and popups",
+          "description": "Clicks common 'accept' buttons and hides known consent banners (OneTrust, Cookiebot, Didomi, Quantcast, Usercentrics and generic patterns).\nExample values: true",
+          "type": "boolean",
+          "default": true,
+          "examples": [
+            true
+          ]
+        },
+        "hideSelectors": {
+          "title": "Extra CSS selectors to hide",
+          "description": "Anything else to remove from the capture, for example .newsletter-popup or #chat-widget.",
+          "type": "array",
+          "items": {
+            "title": "Extra CSS selectors to hide",
+            "description": "Anything else to remove from the capture, for example .newsletter-popup or #chat-widget.",
+            "type": "string"
+          }
+        },
+        "captureErrorPages": {
+          "title": "Capture HTTP error pages",
+          "description": "Off (default): a 4xx/5xx response marks the URL failed, with the status code, and is not charged. On: screenshot the error page anyway.",
+          "type": "boolean",
+          "default": false
+        },
+        "darkMode": {
+          "title": "Dark colour scheme",
+          "description": "Ask pages for their dark theme (prefers-color-scheme: dark).",
+          "type": "boolean",
+          "default": false
+        },
+        "pdfFormat": {
+          "title": "PDF paper size",
+          "description": "Paper size for the PDF.\nExample values: \"A4\"",
+          "type": "string",
+          "enum": [
+            "A4",
+            "Letter",
+            "A3",
+            "Legal"
+          ],
+          "default": "A4",
+          "examples": [
+            "A4"
+          ]
+        },
+        "maxUrls": {
+          "title": "Max URLs",
+          "description": "Safety cap: only the first N unique URLs are captured.\nExample values: 50",
+          "type": "integer",
+          "default": 50,
+          "examples": [
+            50
+          ]
+        },
+        "concurrency": {
+          "title": "Parallel pages",
+          "description": "Pages captured at once. Each page uses memory; raise the memory before raising this.\nExample values: 3",
+          "type": "integer",
+          "default": 3,
+          "examples": [
+            3
+          ]
+        },
+        "timeoutSecs": {
+          "title": "Timeout per URL (seconds)",
+          "description": "How long to wait for one page to load before marking it failed.\nExample values: 45",
+          "type": "integer",
+          "default": 45,
+          "examples": [
+            45
+          ]
+        },
+        "waitSecs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 45,
+          "default": 30,
+          "description": "Max seconds (0\u201345, default 30) to cap the wait for the Actor run to reach terminal state. For long-running Actors the response returns at the cap with the current run status; follow `nextStep` to poll via get-actor-run. Set to 0 to fire-and-forget."
+        }
+      },
+      "required": [
+        "urls"
+      ],
+      "$id": "https://apify.com/mcp/venture_ace--website-screenshot/schema.json"
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Actor run ID"
+        },
+        "apifyConsoleUrl": {
+          "type": "string",
+          "description": "Personalized Apify Console link to the run; present only for Console sessions"
+        },
+        "actorId": {
+          "type": "string",
+          "description": "Stable Apify Actor ID from the run record"
+        },
+        "actorName": {
+          "type": "string",
+          "description": "\"username/actor-name\""
+        },
+        "status": {
+          "type": "string",
+          "description": "Run status: READY | RUNNING | TIMING-OUT | TIMED-OUT | ABORTING | ABORTED | SUCCEEDED | FAILED"
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Pass-through from Apify run.statusMessage"
+        },
+        "exitCode": {
+          "type": "number",
+          "description": "Actor process exit code; populated for terminal states (especially FAILED)"
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run started"
+        },
+        "finishedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run finished (terminal states only)"
+        },
+        "stats": {
+          "type": "object",
+          "description": "Run statistics",
+          "properties": {
+            "runTimeSecs": {
+              "type": "number"
+            },
+            "computeUnits": {
+              "type": "number"
+            },
+            "memMaxBytes": {
+              "type": "number"
+            }
+          }
+        },
+        "storages": {
+          "type": "object",
+          "description": "Dataset and key-value store metadata, keyed by alias. \"default\" is always the primary entry.",
+          "properties": {
+            "datasets": {
+              "type": "object",
+              "description": "Map of dataset alias \u2192 metadata. Key \"default\" is always the run's primary dataset.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Dataset ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "itemCount": {
+                      "type": "number"
+                    },
+                    "inflatedBytes": {
+                      "type": "number",
+                      "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Dataset ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "itemCount": {
+                    "type": "number"
+                  },
+                  "inflatedBytes": {
+                    "type": "number",
+                    "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "keyValueStores": {
+              "type": "object",
+              "description": "Map of key-value store alias \u2192 metadata. Key \"default\" is always the run's primary store.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Key-value store ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "keyCount": {
+                      "type": "number",
+                      "description": "Total number of keys (omitted when truncated)"
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Up to 50 key names"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Key-value store ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "keyCount": {
+                    "type": "number",
+                    "description": "Total number of keys (omitted when truncated)"
+                  },
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Up to 50 key names"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "tip": {
+          "type": "object",
+          "description": "Advisory guidance RAG Web Browser wrote to its key-value store under the reserved \"TIP\" key",
+          "properties": {
+            "message": {
+              "type": "string",
+              "description": "Truncated to 300 characters, with a trailing ellipsis if the Actor's message was longer"
+            },
+            "level": {
+              "type": "string",
+              "enum": [
+                "info",
+                "warning"
+              ],
+              "description": "Omitted when the Actor wrote an unrecognized level"
+            },
+            "recommendedActorId": {
+              "type": "string",
+              "description": "Apify Actor ID the tip recommends, when it names one"
+            },
+            "caveat": {
+              "type": "string",
+              "description": "Present when this session cannot run the Actor the tip recommends"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "Past-tense summary of the run state"
+        },
+        "nextStep": {
+          "type": "string",
+          "description": "One primary follow-up action with identifiers interpolated"
+        }
+      },
+      "required": [
+        "runId",
+        "actorId",
+        "status",
+        "storages",
+        "summary",
+        "nextStep"
+      ]
+    },
+    "annotations": {
+      "title": "venture_ace/website-screenshot",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "execution": {
+      "taskSupport": "optional"
+    }
+  },
+  {
+    "name": "venture_ace--video-frame-extractor",
+    "title": "venture_ace/video-frame-extractor",
+    "description": "This tool calls the Actor \"venture_ace/video-frame-extractor\" and retrieves its output results.\nActor description: Extract frames from video files at direct URLs with ffmpeg: every N seconds, every Nth frame, at scene changes or at exact timestamps. Frames go to the key-value store as JPG or PNG with a dataset row each (timestamp, url, size). A bad URL gets an error row, never a failed run.",
+    "inputSchema": {
+      "title": "Video Frame Extractor input",
+      "type": "object",
+      "properties": {
+        "videoUrls": {
+          "title": "Video file URLs",
+          "description": "**REQUIRED** Direct links to video files (mp4, webm, mov, mkv and anything ffmpeg reads), one per line, up to 20 per run. Page links (YouTube, TikTok, Instagram and similar) are refused with a per-video error. Localhost and private addresses are refused. Max 500 MB per file.\nExample values: [\"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4\"]",
+          "type": "array",
+          "prefill": [
+            "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+          ],
+          "items": {
+            "title": "Video file URLs",
+            "description": "**REQUIRED** Direct links to video files (mp4, webm, mov, mkv and anything ffmpeg reads), one per line, up to 20 per run. Page links (YouTube, TikTok, Instagram and similar) are refused with a per-video error. Localhost and private addresses are refused. Max 500 MB per file.",
+            "type": "string"
+          },
+          "examples": [
+            "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+          ]
+        },
+        "mode": {
+          "title": "Extraction mode",
+          "description": "interval: one frame every N seconds. everyNth: every Nth video frame. sceneChange: the first frame plus a frame at each cut. timestamps: exact times you list.\nExample values: \"interval\"",
+          "type": "string",
+          "enum": [
+            "interval",
+            "everyNth",
+            "sceneChange",
+            "timestamps"
+          ],
+          "default": "interval",
+          "examples": [
+            "interval"
+          ]
+        },
+        "intervalSeconds": {
+          "title": "Seconds between frames (interval mode)",
+          "description": "One frame every this many seconds, starting at 0.\nExample values: 5",
+          "type": "number",
+          "default": 5,
+          "examples": [
+            5
+          ]
+        },
+        "everyNthFrame": {
+          "title": "Frame step (everyNth mode)",
+          "description": "Keep every Nth decoded frame, starting with the first.\nExample values: 30",
+          "type": "integer",
+          "default": 30,
+          "examples": [
+            30
+          ]
+        },
+        "sceneThreshold": {
+          "title": "Scene change threshold (sceneChange mode)",
+          "description": "0.05 to 0.95. Lower finds more cuts (0.3 is a good start for most video).\nExample values: 0.3",
+          "type": "number",
+          "default": 0.3,
+          "examples": [
+            0.3
+          ]
+        },
+        "timestamps": {
+          "title": "Timestamps (timestamps mode)",
+          "description": "Seconds (12.5) or clock time (1:30, 00:01:30.5), one per line. A time past the end of the video is skipped with a note.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "title": "Timestamps (timestamps mode)",
+            "description": "Seconds (12.5) or clock time (1:30, 00:01:30.5), one per line. A time past the end of the video is skipped with a note.",
+            "type": "string"
+          }
+        },
+        "imageFormat": {
+          "title": "Image format",
+          "description": "jpg is smaller; png is lossless and much larger.\nExample values: \"jpg\"",
+          "type": "string",
+          "enum": [
+            "jpg",
+            "png"
+          ],
+          "default": "jpg",
+          "examples": [
+            "jpg"
+          ]
+        },
+        "maxWidth": {
+          "title": "Max frame width (pixels)",
+          "description": "Frames wider than this are scaled down, keeping the aspect ratio. Frames are never scaled up.\nExample values: 1280",
+          "type": "integer",
+          "default": 1280,
+          "examples": [
+            1280
+          ]
+        },
+        "jpegQuality": {
+          "title": "JPG quality",
+          "description": "10 to 100 (jpg only).\nExample values: 85",
+          "type": "integer",
+          "default": 85,
+          "examples": [
+            85
+          ]
+        },
+        "maxFramesPerVideo": {
+          "title": "Max frames per video",
+          "description": "Safety cap per video. Extraction stops there and the last row notes it.\nExample values: 50",
+          "type": "integer",
+          "default": 50,
+          "examples": [
+            50
+          ]
+        },
+        "maxFramesTotal": {
+          "title": "Max frames per run",
+          "description": "Safety cap on all frames in this run (and so on what the run can charge). Videos after it are returned with status skipped.\nExample values: 100",
+          "type": "integer",
+          "default": 100,
+          "examples": [
+            100
+          ]
+        },
+        "waitSecs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 45,
+          "default": 30,
+          "description": "Max seconds (0\u201345, default 30) to cap the wait for the Actor run to reach terminal state. For long-running Actors the response returns at the cap with the current run status; follow `nextStep` to poll via get-actor-run. Set to 0 to fire-and-forget."
+        }
+      },
+      "required": [
+        "videoUrls"
+      ],
+      "$id": "https://apify.com/mcp/venture_ace--video-frame-extractor/schema.json"
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Actor run ID"
+        },
+        "apifyConsoleUrl": {
+          "type": "string",
+          "description": "Personalized Apify Console link to the run; present only for Console sessions"
+        },
+        "actorId": {
+          "type": "string",
+          "description": "Stable Apify Actor ID from the run record"
+        },
+        "actorName": {
+          "type": "string",
+          "description": "\"username/actor-name\""
+        },
+        "status": {
+          "type": "string",
+          "description": "Run status: READY | RUNNING | TIMING-OUT | TIMED-OUT | ABORTING | ABORTED | SUCCEEDED | FAILED"
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Pass-through from Apify run.statusMessage"
+        },
+        "exitCode": {
+          "type": "number",
+          "description": "Actor process exit code; populated for terminal states (especially FAILED)"
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run started"
+        },
+        "finishedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run finished (terminal states only)"
+        },
+        "stats": {
+          "type": "object",
+          "description": "Run statistics",
+          "properties": {
+            "runTimeSecs": {
+              "type": "number"
+            },
+            "computeUnits": {
+              "type": "number"
+            },
+            "memMaxBytes": {
+              "type": "number"
+            }
+          }
+        },
+        "storages": {
+          "type": "object",
+          "description": "Dataset and key-value store metadata, keyed by alias. \"default\" is always the primary entry.",
+          "properties": {
+            "datasets": {
+              "type": "object",
+              "description": "Map of dataset alias \u2192 metadata. Key \"default\" is always the run's primary dataset.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Dataset ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "itemCount": {
+                      "type": "number"
+                    },
+                    "inflatedBytes": {
+                      "type": "number",
+                      "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Dataset ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "itemCount": {
+                    "type": "number"
+                  },
+                  "inflatedBytes": {
+                    "type": "number",
+                    "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "keyValueStores": {
+              "type": "object",
+              "description": "Map of key-value store alias \u2192 metadata. Key \"default\" is always the run's primary store.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Key-value store ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "keyCount": {
+                      "type": "number",
+                      "description": "Total number of keys (omitted when truncated)"
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Up to 50 key names"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Key-value store ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "keyCount": {
+                    "type": "number",
+                    "description": "Total number of keys (omitted when truncated)"
+                  },
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Up to 50 key names"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "tip": {
+          "type": "object",
+          "description": "Advisory guidance RAG Web Browser wrote to its key-value store under the reserved \"TIP\" key",
+          "properties": {
+            "message": {
+              "type": "string",
+              "description": "Truncated to 300 characters, with a trailing ellipsis if the Actor's message was longer"
+            },
+            "level": {
+              "type": "string",
+              "enum": [
+                "info",
+                "warning"
+              ],
+              "description": "Omitted when the Actor wrote an unrecognized level"
+            },
+            "recommendedActorId": {
+              "type": "string",
+              "description": "Apify Actor ID the tip recommends, when it names one"
+            },
+            "caveat": {
+              "type": "string",
+              "description": "Present when this session cannot run the Actor the tip recommends"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "Past-tense summary of the run state"
+        },
+        "nextStep": {
+          "type": "string",
+          "description": "One primary follow-up action with identifiers interpolated"
+        }
+      },
+      "required": [
+        "runId",
+        "actorId",
+        "status",
+        "storages",
+        "summary",
+        "nextStep"
+      ]
+    },
+    "annotations": {
+      "title": "venture_ace/video-frame-extractor",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "execution": {
+      "taskSupport": "optional"
+    }
+  },
+  {
+    "name": "venture_ace--broken-link-checker",
+    "title": "venture_ace/broken-link-checker",
+    "description": "This tool calls the Actor \"venture_ace/broken-link-checker\" and retrieves its output results.\nActor description: Check the links on a page or a whole small site and get one row per link: ok, redirect, broken, or blocked. Confirms every failure with a GET after HEAD, and reports bot-protected links (403, 429, challenges) as blocked, never as broken. Honours robots.txt.",
+    "inputSchema": {
+      "title": "Broken Link Checker input",
+      "type": "object",
+      "properties": {
+        "startUrls": {
+          "title": "Page or link URLs",
+          "description": "**REQUIRED** Up to 10 URLs, one per line. In pageLinks and crawlSite mode these are pages whose links are checked; in urlList mode each one is itself checked. Localhost and private addresses are refused.\nExample values: [\"https://www.iana.org/help/example-domains\"]",
+          "type": "array",
+          "prefill": [
+            "https://www.iana.org/help/example-domains"
+          ],
+          "items": {
+            "title": "Page or link URLs",
+            "description": "**REQUIRED** Up to 10 URLs, one per line. In pageLinks and crawlSite mode these are pages whose links are checked; in urlList mode each one is itself checked. Localhost and private addresses are refused.",
+            "type": "string"
+          },
+          "examples": [
+            "https://www.iana.org/help/example-domains"
+          ]
+        },
+        "mode": {
+          "title": "What to check",
+          "description": "pageLinks: the links on each page you list. crawlSite: also read same-site pages, up to maxPages. urlList: just check the URLs you list.\nExample values: \"pageLinks\"",
+          "type": "string",
+          "enum": [
+            "pageLinks",
+            "crawlSite",
+            "urlList"
+          ],
+          "default": "pageLinks",
+          "examples": [
+            "pageLinks"
+          ]
+        },
+        "maxPages": {
+          "title": "Max pages to read (crawlSite)",
+          "description": "Pages read in crawlSite mode, including the start pages.\nExample values: 10",
+          "type": "integer",
+          "default": 10,
+          "examples": [
+            10
+          ]
+        },
+        "maxLinks": {
+          "title": "Max links to check",
+          "description": "Safety cap on unique links checked in this run (and so on what it can charge). Extra links are reported in the run summary, not checked.\nExample values: 200",
+          "type": "integer",
+          "default": 200,
+          "examples": [
+            200
+          ]
+        },
+        "checkExternal": {
+          "title": "Check links to other sites",
+          "description": "Off: only links on the same site as the page are checked.\nExample values: true",
+          "type": "boolean",
+          "default": true,
+          "examples": [
+            true
+          ]
+        },
+        "includeImages": {
+          "title": "Also check images",
+          "description": "Adds img src links to the check.",
+          "type": "boolean",
+          "default": false
+        },
+        "timeoutSeconds": {
+          "title": "Timeout per request (seconds)",
+          "description": "A link with no answer after two tries is reported as timeout, not broken.\nExample values: 15",
+          "type": "integer",
+          "default": 15,
+          "examples": [
+            15
+          ]
+        },
+        "waitSecs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 45,
+          "default": 30,
+          "description": "Max seconds (0\u201345, default 30) to cap the wait for the Actor run to reach terminal state. For long-running Actors the response returns at the cap with the current run status; follow `nextStep` to poll via get-actor-run. Set to 0 to fire-and-forget."
+        }
+      },
+      "required": [
+        "startUrls"
+      ],
+      "$id": "https://apify.com/mcp/venture_ace--broken-link-checker/schema.json"
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Actor run ID"
+        },
+        "apifyConsoleUrl": {
+          "type": "string",
+          "description": "Personalized Apify Console link to the run; present only for Console sessions"
+        },
+        "actorId": {
+          "type": "string",
+          "description": "Stable Apify Actor ID from the run record"
+        },
+        "actorName": {
+          "type": "string",
+          "description": "\"username/actor-name\""
+        },
+        "status": {
+          "type": "string",
+          "description": "Run status: READY | RUNNING | TIMING-OUT | TIMED-OUT | ABORTING | ABORTED | SUCCEEDED | FAILED"
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Pass-through from Apify run.statusMessage"
+        },
+        "exitCode": {
+          "type": "number",
+          "description": "Actor process exit code; populated for terminal states (especially FAILED)"
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run started"
+        },
+        "finishedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the run finished (terminal states only)"
+        },
+        "stats": {
+          "type": "object",
+          "description": "Run statistics",
+          "properties": {
+            "runTimeSecs": {
+              "type": "number"
+            },
+            "computeUnits": {
+              "type": "number"
+            },
+            "memMaxBytes": {
+              "type": "number"
+            }
+          }
+        },
+        "storages": {
+          "type": "object",
+          "description": "Dataset and key-value store metadata, keyed by alias. \"default\" is always the primary entry.",
+          "properties": {
+            "datasets": {
+              "type": "object",
+              "description": "Map of dataset alias \u2192 metadata. Key \"default\" is always the run's primary dataset.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Dataset ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "itemCount": {
+                      "type": "number"
+                    },
+                    "inflatedBytes": {
+                      "type": "number",
+                      "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Dataset ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the dataset; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "itemCount": {
+                    "type": "number"
+                  },
+                  "inflatedBytes": {
+                    "type": "number",
+                    "description": "Approximate uncompressed byte size of the dataset. Use with itemCount to pick limit/fields before fetching."
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Paths that work as a fields selection (e.g. [\"results\", \"metadata.url\"]); an array field appears by its top-level name."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "keyValueStores": {
+              "type": "object",
+              "description": "Map of key-value store alias \u2192 metadata. Key \"default\" is always the run's primary store.",
+              "properties": {
+                "default": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Key-value store ID"
+                    },
+                    "apifyConsoleUrl": {
+                      "type": "string",
+                      "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "keyCount": {
+                      "type": "number",
+                      "description": "Total number of keys (omitted when truncated)"
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Up to 50 key names"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "default"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Key-value store ID"
+                  },
+                  "apifyConsoleUrl": {
+                    "type": "string",
+                    "description": "Personalized Apify Console link to the store; present only for Console sessions"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "keyCount": {
+                    "type": "number",
+                    "description": "Total number of keys (omitted when truncated)"
+                  },
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Up to 50 key names"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "tip": {
+          "type": "object",
+          "description": "Advisory guidance RAG Web Browser wrote to its key-value store under the reserved \"TIP\" key",
+          "properties": {
+            "message": {
+              "type": "string",
+              "description": "Truncated to 300 characters, with a trailing ellipsis if the Actor's message was longer"
+            },
+            "level": {
+              "type": "string",
+              "enum": [
+                "info",
+                "warning"
+              ],
+              "description": "Omitted when the Actor wrote an unrecognized level"
+            },
+            "recommendedActorId": {
+              "type": "string",
+              "description": "Apify Actor ID the tip recommends, when it names one"
+            },
+            "caveat": {
+              "type": "string",
+              "description": "Present when this session cannot run the Actor the tip recommends"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "description": "Past-tense summary of the run state"
+        },
+        "nextStep": {
+          "type": "string",
+          "description": "One primary follow-up action with identifiers interpolated"
+        }
+      },
+      "required": [
+        "runId",
+        "actorId",
+        "status",
+        "storages",
+        "summary",
+        "nextStep"
+      ]
+    },
+    "annotations": {
+      "title": "venture_ace/broken-link-checker",
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "execution": {
+      "taskSupport": "optional"
+    }
+  }
+]
